@@ -1,0 +1,36 @@
+openssl genpkey -genparam -algorithm DH -out parametersPG.pem
+Genera i parametri Diffie-Hellman (p e g) e li salva in un file.
+openssl pkeyparam -in parametersPG.pem -text
+Visualizza i dettagli dei parametri Diffie-Hellman.
+openssl genpkey -paramfile parametersPG.pem -out AlicePublicPrivateKeyPair.pem
+Genera la coppia di chiavi pubblica e privata per Alice usando i parametri.
+openssl pkey -in AlicePublicPrivateKeyPair.pem -text -noout
+Visualizza i dettagli della coppia di chiavi di Alice.
+openssl genpkey -paramfile parametersPG.pem -out BobPublicPrivateKeyPair.pem
+Genera la coppia di chiavi pubblica e privata per Bob usando i parametri.
+openssl pkey -in BobPublicPrivateKeyPair.pem -text -noout
+Visualizza i dettagli della coppia di chiavi di Bob.
+openssl pkey -in AlicePublicPrivateKeyPair.pem -pubout -out AlicePublicKey.pem
+Estrae e salva la chiave pubblica di Alice in un file separato.
+openssl pkey -in BobPublicPrivateKeyPair.pem -pubout -out BobPublicKey.pem
+Estrae e salva la chiave pubblica di Bob in un file separato.
+openssl pkey -pubin -in BobPublicKey.pem -text
+Visualizza i dettagli della chiave pubblica di Bob.
+openssl pkeyutl -derive -inkey AlicePublicPrivateKeyPair.pem -peerkey BobPublicKey.pem -out AliceSharedSecret.bin
+Deriva il segreto condiviso per Alice usando la sua chiave privata e la pubblica di Bob.
+openssl pkeyutl -derive -inkey BobPublicPrivateKeyPair.pem -peerkey AlicePublicKey.pem -out BobSharedSecret.bin
+Deriva il segreto condiviso per Bob usando la sua chiave privata e la pubblica di Alice.
+xxd AliceSharedSecret.bin
+Visualizza il contenuto binario del segreto condiviso di Alice in formato esadecimale.
+cmp AliceSharedSecret.bin BobSharedSecret.bin
+Confronta i due segreti condivisi per verificare se sono identici.
+cp AliceSharedSecret.bin AliceSharedSecret.txt
+Copia il segreto condiviso di Alice in un nuovo file con estensione txt.
+cp BobSharedSecret.bin BobSharedSecret.txt
+Copia il segreto condiviso di Bob in un nuovo file con estensione txt.
+openssl enc -aes-256-ctr -pbkdf2 -e -a -in plain.txt -out encrypted.txt -pass file:AliceSharedSecret.bin
+Tenta di cifrare un file usando AES-256-CTR con il segreto condiviso come password.
+touch plain.txt
+Crea un file vuoto chiamato plain.txt.
+openssl enc -aes-256-ctr -pbkdf2 -e -a -in plain.txt -out encrypted.txt -pass file:AliceSharedSecret.bin
+Cifra il file plain.txt usando AES-256-CTR con il segreto condiviso come password.
